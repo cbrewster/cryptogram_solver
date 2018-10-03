@@ -1,5 +1,5 @@
-use std::fs::File;
 use std::collections::{HashMap, HashSet};
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::mem;
@@ -25,7 +25,8 @@ fn main() -> Result<(), io::Error> {
 
     let english_words = File::open("english.txt")?;
     let reader = BufReader::new(&english_words);
-    let mut words: Vec<String> = reader.lines()
+    let mut words: Vec<String> = reader
+        .lines()
         .filter_map(|line| line.ok())
         .map(|word| word.to_uppercase())
         .collect();
@@ -41,6 +42,7 @@ fn main() -> Result<(), io::Error> {
     for (encrypted_word, possible_matches) in &matches {
         let mut prev_keys = mem::replace(&mut possible_keys, vec![]);
         prev_keys.dedup();
+
         for prev_key in &prev_keys {
             for solution in *possible_matches {
                 let partial = compute_partial(encrypted_word, prev_key);
@@ -57,7 +59,10 @@ fn main() -> Result<(), io::Error> {
 
                 for (word, word_matches) in &matches {
                     let partial = compute_partial(word, &key);
-                    let has_matches = word_matches.iter().any(|possible| compare_to_partial(possible, &partial));
+                    let has_matches = word_matches
+                        .iter()
+                        .any(|possible| compare_to_partial(possible, &partial));
+
                     if !has_matches {
                         key_valid = false;
                     }
@@ -69,7 +74,6 @@ fn main() -> Result<(), io::Error> {
             }
         }
     }
-
 
     let key = match possible_keys.first() {
         Some(key) => key,
@@ -135,14 +139,17 @@ fn compute_pattern(word: &str) -> String {
                 result.push(current);
                 current = ((current as u8) + 1) as char;
             }
-
         }
     }
 
     result
 }
 
-fn compute_partial_key(encrypted_word: &str, word: &str, prev_key: &HashMap<char, char>) -> Option<HashMap<char, char>> {
+fn compute_partial_key(
+    encrypted_word: &str,
+    word: &str,
+    prev_key: &HashMap<char, char>,
+) -> Option<HashMap<char, char>> {
     assert_eq!(encrypted_word.len(), word.len());
 
     let mut key = prev_key.clone();
